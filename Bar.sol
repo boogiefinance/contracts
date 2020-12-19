@@ -11,7 +11,6 @@ import './libraries/SafeMath.sol';
 import './libraries/SafeERC20.sol';
 import './libraries/IERC20.sol';
 import './libraries/IUniswapV2Router02.sol';
-import './libraries/UniStakingInterfaces.sol';
 import './BOOGIE.sol';
 import './Rave.sol';
 
@@ -59,14 +58,20 @@ contract Bar is Ownable {
     Rave public rave;
     // The Uniswap v2 Router
     IUniswapV2Router02 internal uniswapRouter = IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+
     // The UNI Staking Rewards Factory
+    // Most code related to UNI staking was removed due to the end of UNI staking
+    // I was planning on implementing SUSHI staking at one point, but decided not to because income would be fairly minimal
     //StakingRewardsFactory internal uniStakingFactory = StakingRewardsFactory(0x3032Ab3Fa8C01d786D29dAdE018d7f2017918e12);
     // The UNI Token
-    IERC20 internal uniToken = IERC20(0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984);
+    //IERC20 internal uniToken = IERC20(0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984);
+
     // The WETH Token
     IERC20 internal weth;
+
     // Dev address, commented out since the dev cut for staking was removed
     //address payable public devAddress;
+
     // Contract where the tokens allocated for the referral bonus will be sent
     address public referralAddress;
 
@@ -86,14 +91,10 @@ contract Bar is Ownable {
     // 10% of every deposit into any secondary pool (not BOOGIE-ETH) will be converted to BOOGIE (on Uniswap) and sent to the Rave staking contract which becomes active and starts distributing the accumulated BOOGIE to stakers once the max supply is hit
     uint256 public boogieSentToRave = 0;
 
-    //Removed donation methods
-    // The amount of ETH donated to the BOOGIE community by partner projects
+    //Removed donation stuff
     //uint256 public donatedETH = 0;
-    // Certain partner projects need to donate 25 ETH to the BOOGIE community to get a beach
     //uint256 internal constant minimumDonationAmount = 25 * 10**18;
-    // Mapping of addresses that donated ETH on behalf of a partner project
     //mapping(address => address) internal donaters;
-    // Mapping of the size of donations from partner projects
     //mapping(address => uint256) internal donations;
 
     // Approximate number of blocks per year - assumes 13 second blocks
@@ -171,7 +172,7 @@ contract Bar is Ownable {
 
         _addPool(address(boogie), boogiePoolAddress); // BOOGIE-ETH
 
-        //UNCOMMENT BEFORE RELEASE
+        //Removed 6 pools due to their low liquidity (or getting hacked, in the case of PICKLE)
         /*_addPool(0xdAC17F958D2ee523a2206206994597C13D831ec7, 0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852); // ETH-USDT
         _addPool(0x6B175474E89094C44Da98b954EedeAC495271d0F, 0xA478c2975Ab1Ea89e8196811F51A7B7Ade33eB11); // DAI-ETH
         _addPool(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc); // USDC-ETH
@@ -188,13 +189,13 @@ contract Bar is Ownable {
         _addPool(0xD46bA6D942050d489DBd938a2C909A5d5039A161, 0xc5be99A02C6857f9Eac67BbCE58DF5572498F40c); // AMPL-ETH
         _addPool(0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39, 0x55D5c232D921B9eAA6b37b5845E439aCD04b4DBa); // HEX-ETH
         _addPool(0x93ED3FBe21207Ec2E8f2d3c3de6e058Cb73Bc04d, 0x343FD171caf4F0287aE6b87D75A8964Dc44516Ab); // PNK-ETH
-        _addPool(0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5, 0xdc98556Ce24f007A5eF6dC1CE96322d65832A819); // PICKLE-ETH
+        //_addPool(0x429881672B9AE42b8EbA0E26cD9C73711b891Ca5, 0xdc98556Ce24f007A5eF6dC1CE96322d65832A819); // PICKLE-ETH
         _addPool(0x84294FC9710e1252d407d3D80A84bC39001bd4A8, 0x0C5136B5d184379fa15bcA330784f2d5c226Fe96); // NUTS-ETH
-        _addPool(0x821144518dfE9e7b44fCF4d0824e15e8390d4637, 0x490B5B2489eeFC4106C69743F657e3c4A2870aC5); // ATIS-ETH
-        _addPool(0xB9464ef80880c5aeA54C7324c0b8Dd6ca6d05A90, 0xa8D0f6769AB020877f262D8Cd747c188D9097d7E); // LOCK-ETH
-        _addPool(0x926dbD499d701C61eABe2d576e770ECCF9c7F4F3, 0xC7c0EDf0b5f89eff96aF0E31643Bd588ad63Ea23); // aDAO-ETH
-        _addPool(0x3A9FfF453d50D4Ac52A6890647b823379ba36B9E, 0x260E069deAd76baAC587B5141bB606Ef8b9Bab6c); // SHUF-ETH
-        _addPool(0x9720Bcf5a92542D4e286792fc978B63a09731CF0, 0x08538213596fB2c392e9c5d4935ad37645600a57); // OTBC-ETH
+        //_addPool(0x821144518dfE9e7b44fCF4d0824e15e8390d4637, 0x490B5B2489eeFC4106C69743F657e3c4A2870aC5); // ATIS-ETH
+        //_addPool(0xB9464ef80880c5aeA54C7324c0b8Dd6ca6d05A90, 0xa8D0f6769AB020877f262D8Cd747c188D9097d7E); // LOCK-ETH
+        //_addPool(0x926dbD499d701C61eABe2d576e770ECCF9c7F4F3, 0xC7c0EDf0b5f89eff96aF0E31643Bd588ad63Ea23); // aDAO-ETH
+        //_addPool(0x3A9FfF453d50D4Ac52A6890647b823379ba36B9E, 0x260E069deAd76baAC587B5141bB606Ef8b9Bab6c); // SHUF-ETH
+        //_addPool(0x9720Bcf5a92542D4e286792fc978B63a09731CF0, 0x08538213596fB2c392e9c5d4935ad37645600a57); // OTBC-ETH
         _addPool(0xEEF9f339514298C6A857EfCfC1A762aF84438dEE, 0x23d15EDceb5B5B3A23347Fa425846DE80a2E8e5C);*/ // HEZ-ETH
         
     }
@@ -221,22 +222,6 @@ contract Bar is Ownable {
         }
 
         return user.staked.mul(accBoogiePerShare).div(1e12).sub(user.rewardDebt);
-    }
-
-    // Get the pending UNIs for a user from 1 pool
-    // Pending SUSHI?
-    function _pendingUni(uint256 _pid, address _user) internal view returns (uint256) {
-        /*PoolInfo memory pool = poolInfo[_pid];
-        UserInfo memory user = userInfo[_pid][_user];
-        uint256 accUniPerShare = pool.accUniPerShare;
-        uint256 lpSupply = _getPoolSupply(_pid);
-
-        if (pool.uniStakeContract != address(0) && lpSupply != 0) {
-            uint256 uniReward = IStakingRewards(pool.uniStakeContract).earned(address(this));
-            accUniPerShare = accUniPerShare.add(uniReward.mul(1e12).div(lpSupply));
-        }
-        return user.staked.mul(accUniPerShare).div(1e12).sub(user.uniRewardDebt);*/
-        return 0;
     }
 
     // Calculate the current boogieReward for a specific pool
@@ -354,9 +339,9 @@ contract Bar is Ownable {
             poolMetadata[11] = pool.lpToken.allowance(_user, address(this));
             poolMetadata[12] = _userInfo.staked;
             poolMetadata[13] = _pendingBoogie(_pid, _user);
-            poolMetadata[14] = _pendingUni(_pid, _user);
+            //poolMetadata[14] = _pendingUni(_pid, _user);
             poolMetadata[15] = _userInfo.claimed;
-            poolMetadata[16] = _userInfo.uniClaimed;
+            //poolMetadata[16] = _userInfo.uniClaimed;
         }
     }
 
@@ -443,14 +428,12 @@ contract Bar is Ownable {
     }
 
     // Update reward variables of the given pool to be up-to-date.
+    // Removed code for the UNI staking rewards contract due to the end of UNI staking
     function updatePool(uint256 _pid) public {
         require(msg.sender == tx.origin || msg.sender == owner() || contractWhitelist[msg.sender] == true, "no contracts"); // Prevent flash loan attacks that manipulate prices.
         
         PoolInfo storage pool = poolInfo[_pid];
         uint256 lpSupply = _getPoolSupply(_pid);
-
-        // Removed code for the UNI staking rewards contract due to the end of UNI staking
-
 
         // Only update the pool if the max BOOGIE supply hasn't been hit
         if (boogie.maxSupplyHit() != true) {
@@ -488,12 +471,7 @@ contract Bar is Ownable {
     // Internal view function to get the amount of LP tokens staked in the specified pool
     function _getPoolSupply(uint256 _pid) internal view returns (uint256 lpSupply) {
         PoolInfo memory pool = poolInfo[_pid];
-
-        if (pool.uniStakeContract != address(0)) {
-            lpSupply = IStakingRewards(pool.uniStakeContract).balanceOf(address(this));
-        } else {
-            lpSupply = pool.lpToken.balanceOf(address(this));
-        }
+        lpSupply = pool.lpToken.balanceOf(address(this));
     }
 
     // Deposits LP tokens in the specified pool to start earning the user BOOGIE
@@ -525,20 +503,10 @@ contract Bar is Ownable {
         uint256 stakingFeeAmount = _amount.div(10);
         uint256 remainingUserAmount = _amount.sub(stakingFeeAmount);
 
-        // If a UNI staking rewards contract is available, use it
-        // Commented out stuff related to UNI staking since it ended
-        /*if (pool.uniStakeContract != address(0)) {
-            pool.lpToken.safeApprove(pool.uniStakeContract, 0);
-            pool.lpToken.safeApprove(pool.uniStakeContract, remainingUserAmount);
-            IStakingRewards(pool.uniStakeContract).stake(remainingUserAmount);
-        }*/
-
         // The user is depositing to the BOOGIE-ETH pool so permanently lock all of the LP tokens from the staking fee in the BOOGIE contract
         if (_pid == 0) {
             pool.lpToken.transfer(address(boogie), stakingFeeAmount);
         } else {
-            //uint256 ethBalanceBeforeSwap = address(this).balance; //was used to determine ethReceivedFromStakingFee
-
             // Remove the liquidity from the pool
             uint256 deadline = block.timestamp + 5 minutes;
             pool.lpToken.safeApprove(address(uniswapRouter), 0);
@@ -556,7 +524,6 @@ contract Bar is Ownable {
             uniswapRouter.swapExactTokensForETHSupportingFeeOnTransferTokens(tokensToSwap, 0, poolPath, address(this), deadline);
 
             uint256 ethBalanceAfterSwap = address(this).balance;
-            //uint256 ethReceivedFromStakingFee;
             //uint256 teamFeeAmount; //No dev fee, unlike Surf
 
             // If boogiePoolActive == true then perform a buyback of BOOGIE using all of the ETH in the contract and then send it to the Rave staking contract. 
@@ -564,35 +531,22 @@ contract Bar is Ownable {
             if (boogiePoolActive == true) {
                 require(ethBalanceAfterSwap > 0, "bad eth swap");
 
-                //teamFeeAmount = ethBalanceAfterSwap.div(2);
-                //ethReceivedFromStakingFee = ethBalanceAfterSwap.sub(teamFeeAmount);
-
                 // The BOOGIE-ETH pool is active, so let's use the ETH to buyback BOOGIE and send it to the Rave staking contract
                 uint256 boogieBought = _buyBoogie(ethBalanceAfterSwap);
 
                 // Send the BOOGIE rewards to the Rave staking contract
                 boogieSentToRave += boogieBought;
                 _safeBoogieTransfer(address(rave), boogieBought);
-            } /*else {
-                ethReceivedFromStakingFee = ethBalanceAfterSwap.sub(ethBalanceBeforeSwap);
-                require(ethReceivedFromStakingFee > 0, "bad eth swap");
-
-                teamFeeAmount = ethReceivedFromStakingFee.div(2);
-            }*/
-
-            //if (teamFeeAmount > 0) devAddress.transfer(teamFeeAmount);
+            }
         }
 
         // Add the remaining amount to the user's staked balance
         uint256 _currentRewardDebt = 0;
-        //uint256 _currentUniRewardDebt = 0;
         if (boogiePoolActive != true) {
             _currentRewardDebt = user.staked.mul(pool.accBoogiePerShare).div(1e12).sub(user.rewardDebt);
-            //_currentUniRewardDebt = user.staked.mul(pool.accUniPerShare).div(1e12).sub(user.uniRewardDebt);
         }
         user.staked = user.staked.add(remainingUserAmount);
         user.rewardDebt = user.staked.mul(pool.accBoogiePerShare).div(1e12).sub(_currentRewardDebt);
-        //user.uniRewardDebt = user.staked.mul(pool.accUniPerShare).div(1e12).sub(_currentUniRewardDebt);
 
         emit Deposit(_user, _pid, _amount);
     }
@@ -619,22 +573,14 @@ contract Bar is Ownable {
 
         if (boogiePoolActive != true || user.staked == 0) return;
 
-        /*uint256 userUniPending = user.staked.mul(pool.accUniPerShare).div(1e12).sub(user.uniRewardDebt);
-        uint256 uniBalance = uniToken.balanceOf(address(this));
-        if (userUniPending > uniBalance) userUniPending = uniBalance;
-        if (userUniPending > 0) {
-            user.uniClaimed += userUniPending;
-            uniToken.transfer(_user, userUniPending);
-        }*/
-
         uint256 userBoogiePending = user.staked.mul(pool.accBoogiePerShare).div(1e12).sub(user.rewardDebt);
         if (userBoogiePending > 0) {
             user.claimed += userBoogiePending;
             _safeBoogieTransfer(_user, userBoogiePending);
         }
 
-        if (userBoogiePending > 0) { // || userUniPending > 0
-            emit Claim(_user, _pid, userBoogiePending, 0);
+        if (userBoogiePending > 0) {
+            emit Claim(_user, _pid, userBoogiePending, 0); //userUniPending
         }
     }
 
@@ -646,7 +592,6 @@ contract Bar is Ownable {
         UserInfo storage user = userInfo[_pid][msg.sender];
         PoolInfo memory pool = poolInfo[_pid];
         user.rewardDebt = user.staked.mul(pool.accBoogiePerShare).div(1e12);
-        //user.uniRewardDebt = user.staked.mul(pool.accUniPerShare).div(1e12);
     }
 
     // Claim all earned BOOGIE and UNI from all pools. Claiming won't work until boogiePoolActive == true
@@ -654,7 +599,6 @@ contract Bar is Ownable {
         require(boogiePoolActive == true, "boogie pool not active");
 
         uint256 totalPendingBoogieAmount = 0;
-        //uint256 totalPendingUniAmount = 0;
         
         uint256 length = poolInfo.length;
         for (uint256 pid = 0; pid < length; ++pid) {
@@ -665,28 +609,16 @@ contract Bar is Ownable {
 
                 PoolInfo storage pool = poolInfo[pid];
                 uint256 accBoogiePerShare = pool.accBoogiePerShare;
-                //uint256 accUniPerShare = pool.accUniPerShare;
 
                 uint256 pendingPoolBoogieRewards = user.staked.mul(accBoogiePerShare).div(1e12).sub(user.rewardDebt);
                 user.claimed += pendingPoolBoogieRewards;
                 totalPendingBoogieAmount = totalPendingBoogieAmount.add(pendingPoolBoogieRewards);
                 user.rewardDebt = user.staked.mul(accBoogiePerShare).div(1e12);
-
-                //uint256 pendingPoolUniRewards = user.staked.mul(accUniPerShare).div(1e12).sub(user.uniRewardDebt);
-                //user.uniClaimed += pendingPoolUniRewards;
-                //totalPendingUniAmount = totalPendingUniAmount.add(pendingPoolUniRewards);
-                //user.uniRewardDebt = user.staked.mul(accUniPerShare).div(1e12);
             }
         }
-
-        require(totalPendingBoogieAmount > 0, "nothing to claim"); // || totalPendingUniAmount > 0
-
-        //uint256 uniBalance = uniToken.balanceOf(address(this));
-        //if (totalPendingUniAmount > uniBalance) totalPendingUniAmount = uniBalance;
-        //if (totalPendingUniAmount > 0) uniToken.transfer(msg.sender, totalPendingUniAmount);
+        require(totalPendingBoogieAmount > 0, "nothing to claim"); 
 
         if (totalPendingBoogieAmount > 0) _safeBoogieTransfer(msg.sender, totalPendingBoogieAmount);
-
         emit ClaimAll(msg.sender, totalPendingBoogieAmount, 0); //totalPendingUniAmount
     }
 
@@ -698,19 +630,12 @@ contract Bar is Ownable {
         
         updatePool(_pid);
 
-        // Claim any pending BOOGIE and UNI
+        // Claim any pending BOOGIE
         _claimRewardsFromPool(_pid, msg.sender);
-
         PoolInfo memory pool = poolInfo[_pid];
-
-        // If a UNI staking rewards contract is in use, withdraw from it
-        //if (pool.uniStakeContract != address(0)) {
-        //    IStakingRewards(pool.uniStakeContract).withdraw(_amount);
-        //}
 
         user.staked = user.staked.sub(_amount);
         user.rewardDebt = user.staked.mul(pool.accBoogiePerShare).div(1e12);
-        //user.uniRewardDebt = user.staked.mul(pool.accUniPerShare).div(1e12);
 
         pool.lpToken.safeTransfer(address(msg.sender), _amount);
         emit Withdraw(msg.sender, _pid, _amount);
@@ -744,15 +669,9 @@ contract Bar is Ownable {
         require(staked > 0, "no tokens");
 
         PoolInfo memory pool = poolInfo[_pid];
-
-        // If a UNI staking rewards contract is in use, withdraw from it
-        //if (pool.uniStakeContract != address(0)) {
-        //    IStakingRewards(pool.uniStakeContract).withdraw(staked);
-        //}
         
         user.staked = 0;
         user.rewardDebt = 0;
-        //user.uniRewardDebt = 0;
 
         pool.lpToken.safeTransfer(address(msg.sender), staked);
         emit EmergencyWithdraw(msg.sender, _pid, staked);
@@ -776,9 +695,6 @@ contract Bar is Ownable {
         massUpdatePools();
 
         // The ETH raised from the staking fees collected before boogiePoolActive == true is used to seed the ETH side of the BOOGIE-ETH Uniswap pool.
-        // This means that the higher the staking volume during the first 500 blocks, the higher the initial price of BOOGIE
-        //if (donatedETH > 0 && donatedETH < initialEthLiquidity) initialEthLiquidity = initialEthLiquidity.sub(donatedETH);
-
         // Mint 500,000 new BOOGIE to seed the BOOGIE liquidity in the BOOGIE-ETH Uniswap pool + referral bonus
         uint256 initialMintAmount = 500000 * 10**18;
         boogie.mint(address(this), initialMintAmount);
@@ -816,6 +732,12 @@ contract Bar is Ownable {
     function setReferralAddress(address _address) public onlyOwner {
         referralAddress = _address;
     }
+
+    // Sets the new starting block, used for if I need to delay the launch since I don't want to launch in the middle of a BTC correction
+    //function setStartingBlock(uint256 _startBlock) public onlyOwner {
+    //    require(_startBlock > block.number); //The starting block must be after the current block
+    //    startBlock = _startBlock;
+    //}
 
     // Add a new LP Token pool
     function addPool(address _token, address _lpToken, uint256 _apr) public onlyOwner {
