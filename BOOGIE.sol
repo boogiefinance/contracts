@@ -24,7 +24,7 @@ contract BOOGIE is ERC20("BOOGIE.Finance", "BOOGIE"), Ownable {
     uint256 public constant MAX_SUPPLY = 5000000 * 10**18;
     bool public maxSupplyHit = false;
 
-    // The BOOGIE transfer fee that gets rewarded to Whirlpool stakers (1 = 0.1%). Defaults to 1%
+    // The BOOGIE transfer fee that gets rewarded to Rave stakers (1 = 0.1%). Defaults to 1%
     uint256 public transferFee = 10;
 
     // Mapping of whitelisted sender and recipient addresses that don't pay the transfer fee. Allows BOOGIE token holders to whitelist future contracts
@@ -63,7 +63,7 @@ contract BOOGIE is ERC20("BOOGIE.Finance", "BOOGIE"), Ownable {
         if (_boogiePoolAddress != address(0)) boogiePoolAddress = _boogiePoolAddress;
     }
 
-    // Sets the BOOGIE transfer fee that gets rewarded to Whirlpool stakers. Can't be higher than 10%.
+    // Sets the BOOGIE transfer fee that gets rewarded to Rave stakers. Can't be higher than 10%.
     function setTransferFee(uint256 _transferFee) public onlyOwner {
         require(_transferFee <= 100, "over 10%");
         transferFee = _transferFee;
@@ -138,7 +138,7 @@ contract BOOGIE is ERC20("BOOGIE.Finance", "BOOGIE"), Ownable {
                 _balances[recipient] = _balances[recipient].add(tokensToTransfer);
                 _moveDelegates(_delegates[sender], _delegates[recipient], tokensToTransfer);
 
-                // If the Whirlpool staking contract is the transfer recipient, addBoogieReward gets called to keep things in sync
+                // If the Rave staking contract is the transfer recipient, addBoogieReward gets called to keep things in sync
                 if (recipient == raveAddress) Rave(raveAddress).addBoogieReward(sender, tokensToTransfer);
             }
 
